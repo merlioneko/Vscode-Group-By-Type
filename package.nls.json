@@ -1,0 +1,4 @@
+{
+  "view.name": "File Grouper",
+  "viewsWelcome.noFolder": "No folder is open.\n[Open Folder](command:vscode.openFolder)"
+}
