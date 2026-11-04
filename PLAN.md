@@ -40,12 +40,13 @@
 
 | script | 内容 |
 |---|---|
-| `compile` | `tsc -p .` |
+| `compile` | `out/` を消してから `tsc -p .`（消したソースの古い出力が残って、テストとして実行されないようにする） |
 | `dev` | `compile` の後に `node scripts/prepare-fixture.mjs` |
 | `lint` | `eslint src` |
 | `test:unit` | `compile` の後に `mocha "out/test/unit/**/*.test.js"` |
 | `test:integration` | `dev` の後に `vscode-test` |
 | `check:rules` | `node scripts/check-rules.mjs` |
+| `vscode:prepublish` | `npm run compile`（vsce が VSIX を作る前に実行する。`out/` は git で管理しないため、これがないと新しいクローンで `package` が失敗する） |
 | `package` | `vsce package --allow-missing-repository --skip-license` |
 
 - `.vscode-test.mjs`：files は `out/test/integration/**/*.test.js`、workspaceFolder は `.test-workspace/sample`、mocha の timeout は 20 秒。root で実行しているときだけ、launchArgs に `--no-sandbox` を加える（クラウド環境は root で動くため）。テストは最新の stable の VS Code で行い、1.90 では実行しない

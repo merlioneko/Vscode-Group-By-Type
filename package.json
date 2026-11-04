@@ -25,6 +25,7 @@
       {
         "command": "fileGrouper.refresh",
         "title": "%command.refresh%",
+        "category": "File Grouper",
         "icon": "$(refresh)"
       }
     ],
@@ -54,13 +55,14 @@
     ]
   },
   "scripts": {
-    "compile": "tsc -p .",
+    "compile": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\" && tsc -p .",
     "dev": "npm run compile && node scripts/prepare-fixture.mjs",
     "lint": "eslint src",
     "test:unit": "npm run compile && mocha \"out/test/unit/**/*.test.js\"",
     "test:integration": "npm run dev && vscode-test",
     "check:rules": "node scripts/check-rules.mjs",
     "screenshot": "node scripts/screenshot.mjs",
+    "vscode:prepublish": "npm run compile",
     "package": "vsce package --allow-missing-repository --skip-license"
   },
   "dependencies": {
