@@ -192,6 +192,7 @@ interface ErrorNode {
 
 - **場所**：エクスプローラー（`contributes.views.explorer`）。ビュー ID は `fileGrouper.view`。
 - **タイトルバー**：「最新の情報に更新」（コマンド `fileGrouper.refresh`、アイコン `$(refresh)`）と「すべて折りたたむ」（`createTreeView` の `showCollapseAll: true`）を置く。
+- **コマンドパレット**：`fileGrouper.refresh` にはカテゴリ `File Grouper` を付け、「File Grouper: 最新の情報に更新」と表示する。カテゴリがないと「最新の情報に更新」だけになり、ほかのコマンドと見分けにくい（利用者確認済み）。
 - 右クリックメニューはない。
 
 ### 行の表示
@@ -218,6 +219,7 @@ interface ErrorNode {
 |---|---|---|
 | ビュー名 | File Grouper | （翻訳しない） |
 | 更新コマンド | Refresh | 最新の情報に更新 |
+| コマンドのカテゴリ | File Grouper | （翻訳しない） |
 | 拡張子なしのグループ | (no extension) | (拡張子なし) |
 | エラー行 | Cannot read this folder | このフォルダーを読み込めません |
 | ファイルが消えていたときの警告 | File not found: {0} | ファイルが見つかりません: {0} |

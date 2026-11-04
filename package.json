@@ -25,6 +25,7 @@
       {
         "command": "fileGrouper.refresh",
         "title": "%command.refresh%",
+        "category": "File Grouper",
         "icon": "$(refresh)"
       }
     ],
