@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { registerOpenFile } from './openFile';
 import { workspaceDirectoryReader } from './tree/directoryReader';
 import { FileGrouperProvider } from './tree/provider';
 
@@ -16,7 +17,7 @@ export function activate(context: vscode.ExtensionContext): FileGrouperApi {
     treeDataProvider: provider,
     showCollapseAll: true,
   });
-  context.subscriptions.push(log, provider, view);
+  context.subscriptions.push(log, provider, view, registerOpenFile(() => provider.refresh()));
   return { provider };
 }
 

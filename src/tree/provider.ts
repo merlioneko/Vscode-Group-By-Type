@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { buildChildren, joinRelPath } from '../core/buildChildren';
 import { createExcludeMatcher, type ExcludeMatcher } from '../core/exclude';
 import { errorId, fileId, folderId, groupId } from '../core/ids';
+import { OPEN_FILE_COMMAND } from '../openFile';
 import type { DirectoryReader } from './directoryReader';
 import type { ErrorNode, FileNode, FolderNode, GroupNode, Node } from './nodes';
 
@@ -74,6 +75,7 @@ export class FileGrouperProvider implements vscode.TreeDataProvider<Node>, vscod
         item.resourceUri = node.uri;
         item.iconPath = vscode.ThemeIcon.File;
         item.contextValue = 'file';
+        item.command = { command: OPEN_FILE_COMMAND, title: 'Open', arguments: [node.uri] };
         return item;
       }
       case 'error': {
