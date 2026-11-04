@@ -40,7 +40,7 @@
 
 | script | 内容 |
 |---|---|
-| `compile` | `tsc -p .` |
+| `compile` | `out/` を消してから `tsc -p .`（消したソースの古い出力が残って、テストとして実行されないようにする） |
 | `dev` | `compile` の後に `node scripts/prepare-fixture.mjs` |
 | `lint` | `eslint src` |
 | `test:unit` | `compile` の後に `mocha "out/test/unit/**/*.test.js"` |

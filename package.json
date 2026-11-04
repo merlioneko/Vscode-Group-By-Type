@@ -54,7 +54,7 @@
     ]
   },
   "scripts": {
-    "compile": "tsc -p .",
+    "compile": "node -e \"require('fs').rmSync('out',{recursive:true,force:true})\" && tsc -p .",
     "dev": "npm run compile && node scripts/prepare-fixture.mjs",
     "lint": "eslint src",
     "test:unit": "npm run compile && mocha \"out/test/unit/**/*.test.js\"",
