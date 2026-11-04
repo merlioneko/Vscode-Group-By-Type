@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { registerOpenFile } from './openFile';
+import { watchForRefresh } from './refresh';
 import { workspaceDirectoryReader } from './tree/directoryReader';
 import { FileGrouperProvider } from './tree/provider';
 
@@ -24,6 +25,7 @@ export function activate(context: vscode.ExtensionContext): FileGrouperApi {
     view,
     registerOpenFile(() => provider.refresh()),
     vscode.commands.registerCommand(REFRESH_COMMAND, () => provider.refresh()),
+    watchForRefresh(provider),
   );
   return { provider };
 }
