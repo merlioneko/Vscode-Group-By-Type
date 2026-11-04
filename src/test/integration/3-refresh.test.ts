@@ -91,6 +91,29 @@ describe('3-refresh', () => {
     }
   });
 
+  it('files.exclude に "**/*.md": true を加えると .md のグループが消える', async () => {
+    const config = vscode.workspace.getConfiguration('files', workspaceRoot());
+    const original = config.inspect<Record<string, unknown>>('exclude')?.workspaceValue;
+    const mdGroupsIn = async (labels: string[]): Promise<number> => {
+      const children = await provider.getChildren(await findNode(provider, labels));
+      return children.filter((n) => n.kind === 'group' && n.key === '.md').length;
+    };
+    assert.equal(await mdGroupsIn(['sample']), 1);
+    assert.equal(await mdGroupsIn(['sample', 'docs']), 1);
+    await waitForQuiet();
+
+    const before = fireCount;
+    try {
+      await config.update('exclude', { ...original, '**/*.md': true }, vscode.ConfigurationTarget.Workspace);
+      await waitForFire(before, 3000);
+      assert.equal(await mdGroupsIn(['sample']), 0);
+      assert.equal(await mdGroupsIn(['sample', 'docs']), 0);
+    } finally {
+      await config.update('exclude', original, vscode.ConfigurationTarget.Workspace);
+    }
+    assert.equal(await mdGroupsIn(['sample']), 1);
+  });
+
   it('fileGrouper.refresh を実行すると onDidChangeTreeData が発火する', async () => {
     const before = fireCount;
     await vscode.commands.executeCommand('fileGrouper.refresh');
