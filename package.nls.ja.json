@@ -1,0 +1,5 @@
+{
+  "command.refresh": "最新の情報に更新",
+  "view.name": "File Grouper",
+  "viewsWelcome.noFolder": "フォルダーが開かれていません。\n[フォルダーを開く](command:vscode.openFolder)"
+}
