@@ -4,6 +4,7 @@ import { workspaceDirectoryReader } from './tree/directoryReader';
 import { FileGrouperProvider } from './tree/provider';
 
 export const VIEW_ID = 'fileGrouper.view';
+export const REFRESH_COMMAND = 'fileGrouper.refresh';
 
 /** 統合テスト用に返す */
 export interface FileGrouperApi {
@@ -17,7 +18,13 @@ export function activate(context: vscode.ExtensionContext): FileGrouperApi {
     treeDataProvider: provider,
     showCollapseAll: true,
   });
-  context.subscriptions.push(log, provider, view, registerOpenFile(() => provider.refresh()));
+  context.subscriptions.push(
+    log,
+    provider,
+    view,
+    registerOpenFile(() => provider.refresh()),
+    vscode.commands.registerCommand(REFRESH_COMMAND, () => provider.refresh()),
+  );
   return { provider };
 }
 
