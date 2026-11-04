@@ -5,10 +5,11 @@
 //   --open <relPath>  File Grouper のツリーをたどって、このファイルをクリックして開く（例：docs/logo.png）
 //   --expand-all      File Grouper のツリーをすべて展開する
 //   --no-folder       フォルダを開かずに起動する
+//   --create <relPath> 展開と「開く」の後にテスト用ワークスペースへ空のファイルを作り、反映を待ってから撮影する。撮影後に消す
 //
 // Playwright は devDependencies に入れていない。リポジトリの node_modules か、
 // グローバル（NODE_PATH）にあるものを使う。
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -34,13 +35,14 @@ function loadPlaywright() {
 }
 
 function parseArgs(argv) {
-  const options = { out: join(repoRoot, '.vscode-test', 'screenshots', 'screenshot.png'), open: undefined, expandAll: false, noFolder: false };
+  const options = { out: join(repoRoot, '.vscode-test', 'screenshots', 'screenshot.png'), open: undefined, expandAll: false, noFolder: false, create: undefined };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--out') options.out = resolve(argv[++i]);
     else if (arg === '--open') options.open = argv[++i];
     else if (arg === '--expand-all') options.expandAll = true;
     else if (arg === '--no-folder') options.noFolder = true;
+    else if (arg === '--create') options.create = argv[++i];
     else {
       console.error(`不明な引数：${arg}`);
       process.exit(1);
@@ -87,6 +89,7 @@ const args = [
   ...(options.noFolder ? [] : [join(repoRoot, '.test-workspace', 'sample')]),
 ];
 
+let createdFile;
 const app = await electron.launch({ executablePath, args });
 try {
   const page = await app.firstWindow();
@@ -161,6 +164,17 @@ try {
     await sleep(2000);
   }
 
+  if (options.create) {
+    createdFile = join(repoRoot, '.test-workspace', 'sample', ...options.create.split('/'));
+    if (existsSync(createdFile)) {
+      console.error(`既にある：${createdFile}`);
+      process.exit(1);
+    }
+    writeFileSync(createdFile, '');
+    // 待ち合わせ（300ms）とファイル監視の遅れを見込んで待つ
+    await sleep(2000);
+  }
+
   // 通知（root で実行している警告など）を消す
   await page.keyboard.press('F1');
   await page.keyboard.type('Clear All Notifications');
@@ -171,6 +185,7 @@ try {
   await page.screenshot({ path: options.out });
   console.log(`saved ${options.out}（行数：${await rows.count()}）`);
 } finally {
+  if (createdFile) rmSync(createdFile, { force: true });
   await app.close();
   rmSync(userDataDir, { recursive: true, force: true });
 }

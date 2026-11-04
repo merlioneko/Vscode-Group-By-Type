@@ -20,6 +20,22 @@
     "virtualWorkspaces": true
   },
   "contributes": {
+    "commands": [
+      {
+        "command": "fileGrouper.refresh",
+        "title": "%command.refresh%",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "fileGrouper.refresh",
+          "when": "view == fileGrouper.view",
+          "group": "navigation"
+        }
+      ]
+    },
     "views": {
       "explorer": [
         {
