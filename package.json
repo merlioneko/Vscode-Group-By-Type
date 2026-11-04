@@ -43,6 +43,7 @@
     "test:unit": "npm run compile && mocha \"out/test/unit/**/*.test.js\"",
     "test:integration": "npm run dev && vscode-test",
     "check:rules": "node scripts/check-rules.mjs",
+    "screenshot": "node scripts/screenshot.mjs",
     "package": "vsce package --allow-missing-repository --skip-license"
   },
   "dependencies": {
