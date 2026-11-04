@@ -19,7 +19,23 @@
     },
     "virtualWorkspaces": true
   },
-  "contributes": {},
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "fileGrouper.view",
+          "name": "%view.name%"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "fileGrouper.view",
+        "contents": "%viewsWelcome.noFolder%",
+        "when": "workspaceFolderCount == 0"
+      }
+    ]
+  },
   "scripts": {
     "compile": "tsc -p .",
     "dev": "npm run compile && node scripts/prepare-fixture.mjs",
