@@ -5,11 +5,13 @@
 //   --open <relPath>  File Grouper のツリーをたどって、このファイルをクリックして開く（例：docs/logo.png）
 //   --expand-all      File Grouper のツリーをすべて展開する
 //   --no-folder       フォルダを開かずに起動する
+//   --locale <id>     表示言語（例：ja）。VS Code の言語パックを .vscode-test/extensions-locale に入れておく：
+//                     code --extensions-dir=.vscode-test/extensions-locale --install-extension MS-CEINTL.vscode-language-pack-ja
 //   --create <relPath> 展開と「開く」の後にテスト用ワークスペースへ空のファイルを作り、反映を待ってから撮影する。撮影後に消す
 //
 // Playwright は devDependencies に入れていない。リポジトリの node_modules か、
 // グローバル（NODE_PATH）にあるものを使う。
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -35,7 +37,7 @@ function loadPlaywright() {
 }
 
 function parseArgs(argv) {
-  const options = { out: join(repoRoot, '.vscode-test', 'screenshots', 'screenshot.png'), open: undefined, expandAll: false, noFolder: false, create: undefined };
+  const options = { out: join(repoRoot, '.vscode-test', 'screenshots', 'screenshot.png'), open: undefined, expandAll: false, noFolder: false, create: undefined, locale: undefined };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--out') options.out = resolve(argv[++i]);
@@ -43,6 +45,7 @@ function parseArgs(argv) {
     else if (arg === '--expand-all') options.expandAll = true;
     else if (arg === '--no-folder') options.noFolder = true;
     else if (arg === '--create') options.create = argv[++i];
+    else if (arg === '--locale') options.locale = argv[++i];
     else {
       console.error(`不明な引数：${arg}`);
       process.exit(1);
@@ -58,8 +61,18 @@ const { extKey } = require('./out/core/extKey.js');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// ソケットのパスが長すぎると VS Code が起動しないので、短い一時フォルダを使う
-const userDataDir = mkdtempSync(join(tmpdir(), 'fg-'));
+/** 拡張子なしのグループのラベル（表示言語に合わせる） */
+function noExtensionLabel() {
+  const bundle = options.locale && join(repoRoot, 'l10n', `bundle.l10n.${options.locale}.json`);
+  if (bundle && existsSync(bundle)) {
+    return JSON.parse(readFileSync(bundle, 'utf8'))['(no extension)'] ?? '(no extension)';
+  }
+  return '(no extension)';
+}
+
+// ソケットのパスが長すぎると VS Code が起動しないので、短い一時フォルダを使う。
+// 表示言語を指定したときは、言語パックの登録（languagepacks.json）を残すため、言語ごとに固定のフォルダを使う
+const userDataDir = options.locale ? join(tmpdir(), `fg-locale-${options.locale}`) : mkdtempSync(join(tmpdir(), 'fg-'));
 mkdirSync(join(userDataDir, 'User'), { recursive: true });
 writeFileSync(
   join(userDataDir, 'User', 'settings.json'),
@@ -82,12 +95,21 @@ const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
 const args = [
   `--extensionDevelopmentPath=${repoRoot}`,
   `--user-data-dir=${userDataDir}`,
-  `--extensions-dir=${join(userDataDir, 'extensions')}`,
+  `--extensions-dir=${options.locale ? join(repoRoot, '.vscode-test', 'extensions-locale') : join(userDataDir, 'extensions')}`,
   '--skip-welcome',
   '--skip-release-notes',
   ...(isRoot ? ['--no-sandbox'] : []),
+  ...(options.locale ? [`--locale=${options.locale}`] : []),
   ...(options.noFolder ? [] : [join(repoRoot, '.test-workspace', 'sample')]),
 ];
+
+if (options.locale && !existsSync(join(userDataDir, 'languagepacks.json'))) {
+  // 言語パックは、一度起動したときに user-data-dir へ登録される
+  const warmup = await electron.launch({ executablePath, args });
+  await (await warmup.firstWindow()).waitForSelector('.monaco-workbench', { timeout: 60000 });
+  await sleep(5000);
+  await warmup.close();
+}
 
 let createdFile;
 const app = await electron.launch({ executablePath, args });
@@ -157,7 +179,7 @@ try {
       level++;
     }
     const key = extKey(fileName);
-    const group = rowAt(level, key === '' ? '(no extension)' : key).first();
+    const group = rowAt(level, key === '' ? noExtensionLabel() : key).first();
     if ((await group.getAttribute('aria-expanded')) === 'false') await group.click();
     await sleep(300);
     await rowAt(level + 1, fileName).first().click();
@@ -187,5 +209,5 @@ try {
 } finally {
   if (createdFile) rmSync(createdFile, { force: true });
   await app.close();
-  rmSync(userDataDir, { recursive: true, force: true });
+  if (!options.locale) rmSync(userDataDir, { recursive: true, force: true });
 }
