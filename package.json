@@ -1,0 +1,48 @@
+{
+  "name": "vscode-file-grouper",
+  "displayName": "File Grouper",
+  "description": "A tree view that groups the files in each folder by extension.",
+  "publisher": "local",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {},
+  "scripts": {
+    "compile": "tsc -p .",
+    "dev": "npm run compile && node scripts/prepare-fixture.mjs",
+    "lint": "eslint src",
+    "test:unit": "npm run compile && mocha \"out/test/unit/**/*.test.js\"",
+    "test:integration": "npm run dev && vscode-test",
+    "check:rules": "node scripts/check-rules.mjs",
+    "package": "vsce package --allow-missing-repository --skip-license"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.7"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^20.19.43",
+    "@types/picomatch": "^4.0.3",
+    "@types/vscode": "1.90.0",
+    "@vscode/test-cli": "^0.0.15",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.1.0",
+    "eslint": "^10.14.0",
+    "mocha": "^12.0.3",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1"
+  }
+}

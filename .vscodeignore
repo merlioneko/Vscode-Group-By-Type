@@ -1,0 +1,13 @@
+src/**
+out/test/**
+.vscode/**
+scripts/**
+.test-workspace/**
+.vscode-test/**
+**/*.map
+tsconfig.json
+eslint.config.*
+.vscode-test.mjs
+SPEC.md
+PLAN.md
+CLAUDE.md
