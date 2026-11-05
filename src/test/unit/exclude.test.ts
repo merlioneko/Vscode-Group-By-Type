@@ -1,10 +1,17 @@
 import * as assert from 'node:assert/strict';
 import { createExcludeMatcher } from '../../core/exclude';
 
-/** relPath の最後の部分を名前として判定する */
+/**
+ * relPath の最後の部分を名前として判定する。
+ * siblings は同じディレクトリにあるほかの項目の名前で、判定対象と一緒にまとめて渡す。
+ */
 function check(config: unknown, relPath: string, siblings: string[] = []): boolean {
-  const name = relPath.slice(relPath.lastIndexOf('/') + 1);
-  return createExcludeMatcher(config)(relPath, name, new Set(siblings));
+  const slash = relPath.lastIndexOf('/');
+  const dir = relPath.slice(0, slash + 1);
+  const name = relPath.slice(slash + 1);
+  const names = new Set([name, ...siblings]);
+  const items = [...names].map((n) => ({ relPath: dir + n, name: n }));
+  return createExcludeMatcher(config)(items).has(name);
 }
 
 describe('createExcludeMatcher (BL-2)', () => {

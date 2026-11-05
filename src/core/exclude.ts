@@ -1,13 +1,19 @@
 import picomatch from 'picomatch';
 import { stripLastExt } from './extKey';
 
+/** 除外判定の対象になる、ディレクトリ直下の1項目 */
+export interface ExcludeItem {
+  /** ルートから見た `/` 区切りの相対パス（例：`src/app.js`） */
+  relPath: string;
+  /** 項目の名前（relPath の最後の部分） */
+  name: string;
+}
+
 /**
- * 除外判定関数。
- * @param relPath ルートから見た `/` 区切りの相対パス（例：`src/app.js`）
- * @param name 項目の名前（relPath の最後の部分）
- * @param siblingNames 同じディレクトリにある項目の名前（除外前のすべて）
+ * 除外判定関数。1つのディレクトリ直下の項目（除外前のすべて）をまとめて受け取り、
+ * 除外する項目の名前を返す。
  */
-export type ExcludeMatcher = (relPath: string, name: string, siblingNames: ReadonlySet<string>) => boolean;
+export type ExcludeMatcher = (items: readonly ExcludeItem[]) => ReadonlySet<string>;
 
 interface Rule {
   matches: (relPath: string) => boolean;
@@ -41,21 +47,26 @@ export function createExcludeMatcher(config: unknown): ExcludeMatcher {
     }
   }
 
-  return (relPath, name, siblingNames) => {
+  return (items) => {
+    const siblingNames = new Set(items.map((item) => item.name));
+    const excluded = new Set<string>();
     for (const rule of rules) {
-      if (!rule.matches(relPath)) {
-        continue;
-      }
-      if (rule.when === undefined) {
-        return true;
-      }
-      const counterpart = rule.when.split(BASENAME).join(stripLastExt(name));
-      if (siblingNames.has(counterpart)) {
-        return true;
+      for (const item of items) {
+        if (excluded.has(item.name) || !rule.matches(item.relPath)) {
+          continue;
+        }
+        if (rule.when === undefined || siblingNames.has(counterpartOf(rule.when, item.name))) {
+          excluded.add(item.name);
+        }
       }
     }
-    return false;
+    return excluded;
   };
+}
+
+/** when の `$(basename)` を、名前から最後の拡張子を除いたものに置き換える */
+function counterpartOf(when: string, name: string): string {
+  return when.split(BASENAME).join(stripLastExt(name));
 }
 
 function isWhen(value: unknown): value is { when: string } {
