@@ -1,4 +1,4 @@
-# File Grouper 実装計画書
+# Group by Type 実装計画書
 
 > 仕様は SPEC.md に書く。本書には作業の順序と完了判定だけを書く。
 
@@ -29,7 +29,7 @@
 **作業**
 
 - package.json
-  - name `vscode-file-grouper`、displayName `File Grouper`、publisher `local`、version `0.1.0`
+  - name `vscode-group-by-type`、displayName `Group by Type`、publisher `local`、version `0.1.0`
   - `engines.vscode: "^1.90.0"`、`main: "./out/extension.js"`、`activationEvents: []`、`capabilities`（SPEC K-16）
   - contributes は空でよい
 - 依存パッケージ
@@ -47,7 +47,7 @@
 | `test:integration` | `dev` の後に `vscode-test` |
 | `check:rules` | `node scripts/check-rules.mjs` |
 | `vscode:prepublish` | `npm run compile`（vsce が VSIX を作る前に実行する。`out/` は git で管理しないため、これがないと新しいクローンで `package` が失敗する） |
-| `package` | `vsce package --allow-missing-repository --skip-license` |
+| `package` | `vsce package --allow-missing-repository`（`LICENSE` も VSIX に入る） |
 
 - `.vscode-test.mjs`：files は `out/test/integration/**/*.test.js`、workspaceFolder は `.test-workspace/sample`、mocha の timeout は 20 秒。root で実行しているときだけ、launchArgs に `--no-sandbox` を加える（クラウド環境は root で動くため）。テストは最新の stable の VS Code で行い、1.90 では実行しない
 - `scripts/prepare-fixture.mjs`：M0 では、空の `.test-workspace/sample/` を作り直すだけでよい（中身は M2 で作る）
@@ -59,7 +59,7 @@
 - `.vscodeignore`：`src/**`、`out/test/**`、`.vscode/**`、`scripts/**`、`.test-workspace/**`、`.vscode-test/**`、`**/*.map`、`tsconfig.json`、`eslint.config.*`、`.vscode-test.mjs`、`SPEC.md`、`PLAN.md`、`CLAUDE.md`
 - `.vscode/launch.json`：「Run Extension」。preLaunchTask で `npm: dev` を実行し、`.test-workspace/sample` を開いた拡張機能開発ホストを F5 で起動する
 - `src/extension.ts`：空の activate と deactivate
-- 仮のテストを置く。単体テストは1件（自明な assert でよい）。統合テストは1件（拡張機能 `local.vscode-file-grouper` が見つかり、activate できる）
+- 仮のテストを置く。単体テストは1件（自明な assert でよい）。統合テストは1件（拡張機能 `local.vscode-group-by-type` が見つかり、activate できる）
 
 **完了判定**
 
@@ -118,7 +118,7 @@
 **完了判定**
 
 1. `npm run test:integration` が成功し、次を確かめている。
-   - AC-1：`fileGrouper.view.focus` が成功する
+   - AC-1：`groupByType.view.focus` が成功する
    - AC-2〜AC-4：ルートから getChildren と getTreeItem をたどり、種類・ラベル・説明・collapsibleState・順序が「期待するツリー」と一致する。テストは英語表示で動くので、拡張子なしのラベルは `(no extension)` になる
    - AC-5：`README.md` の行の command を実行すると、アクティブなタブが `TabInputText` で uri が一致する。`docs/logo.png` では、タブ名が `logo.png` で、`TabInputText` ではない
    - AC-6：`1-display.test.ts` の前後で、一時ワークスペースのスナップショット（パス、サイズ、更新日時、SHA-1）が一致する
@@ -138,7 +138,7 @@
 
 **作業**
 
-- `fileGrouper.refresh` コマンドと、タイトルバーのボタン（`contributes.commands`、`menus.view/title`）
+- `groupByType.refresh` コマンドと、タイトルバーのボタン（`contributes.commands`、`menus.view/title`）
 - `src/refresh.ts`：ファイル監視と 300ms の待ち合わせ。`files.exclude` の変更とワークスペースフォルダの変更も扱う
 - `3-refresh.test.ts`
 
@@ -147,7 +147,7 @@
 1. `npm run test:integration` が成功し、次を確かめている。
    - `src/new.py` を作ると、3秒以内に `onDidChangeTreeData` が発火し、`src` の `.py` グループが3件になる。消すと2件に戻る
    - 100 個のファイルを続けて作っても、描き直しは3回以内に収まる
-   - `fileGrouper.refresh` を実行すると `onDidChangeTreeData` が発火する
+   - `groupByType.refresh` を実行すると `onDidChangeTreeData` が発火する
    - ワークスペース設定の `files.exclude` に `"**/*.md": true` を加えると、`.md` のグループが消える（テストの最後に元に戻す）
    - ワークスペースフォルダの追加は自動テストにしない。単一フォルダの状態から追加すると、拡張機能ホストが再起動するため。手動チェック 7 で確かめる
 2. `npm run check:rules` が成功する。
@@ -167,7 +167,7 @@
 
 1. `npm run package` が成功する。`npx vsce ls` の一覧に、`src/`、テスト、`.test-workspace/` が含まれない。
 2. これまでの全テストと `npm run check:rules` が成功する。
-3. 利用者が VSIX をチャットで受け取るか、手元で `npm ci && npm run package` を実行して作る。`code --install-extension vscode-file-grouper-0.1.0.vsix` でインストールし、手動チェックの 1〜10 がすべて通る。リモート環境を使う場合は、そこでも 1〜6 を確かめる（U5）。
+3. 利用者が VSIX をチャットで受け取るか、手元で `npm ci && npm run package` を実行して作る。`code --install-extension vscode-group-by-type-0.1.0.vsix` でインストールし、手動チェックの 1〜10 がすべて通る。リモート環境を使う場合は、そこでも 1〜6 を確かめる（U5）。
 
 **完了後**：利用者が数日使って U1 を判定する。二次実装には、U1 で効果が確かめられるまで着手しない。
 
@@ -179,7 +179,7 @@ M2〜M3 では、「Claude Code（撮影）」の項目を Claude Code が撮影
 
 | # | 確かめること | 対応 | M2〜M3 で確かめる人 |
 |---|---|---|---|
-| 1 | エクスプローラーに「File Grouper」のセクションがある | AC-1 | Claude Code（撮影） |
+| 1 | エクスプローラーに「Group by Type」のセクションがある | AC-1 | Claude Code（撮影） |
 | 2 | テスト用ワークスペースで、表示が「期待するツリー」と同じになる | AC-2〜4 | Claude Code（撮影） |
 | 3 | グループを1つ開閉しても、ほかのグループは変わらない | AC-4 | 利用者（M4） |
 | 4 | `README.md` がテキストエディターで、`logo.png` が画像プレビューで開く | AC-5 | Claude Code（撮影） |

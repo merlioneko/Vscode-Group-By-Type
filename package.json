@@ -1,9 +1,10 @@
 {
-  "name": "vscode-file-grouper",
-  "displayName": "File Grouper",
+  "name": "vscode-group-by-type",
+  "displayName": "Group by Type",
   "description": "A tree view that groups the files in each folder by extension.",
   "publisher": "local",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
@@ -23,17 +24,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "fileGrouper.refresh",
+        "command": "groupByType.refresh",
         "title": "%command.refresh%",
-        "category": "File Grouper",
+        "category": "Group by Type",
         "icon": "$(refresh)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "fileGrouper.refresh",
-          "when": "view == fileGrouper.view",
+          "command": "groupByType.refresh",
+          "when": "view == groupByType.view",
           "group": "navigation"
         }
       ]
@@ -41,14 +42,14 @@
     "views": {
       "explorer": [
         {
-          "id": "fileGrouper.view",
+          "id": "groupByType.view",
           "name": "%view.name%"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "fileGrouper.view",
+        "view": "groupByType.view",
         "contents": "%viewsWelcome.noFolder%",
         "when": "workspaceFolderCount == 0"
       }
@@ -63,7 +64,7 @@
     "check:rules": "node scripts/check-rules.mjs",
     "screenshot": "node scripts/screenshot.mjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --allow-missing-repository --skip-license"
+    "package": "vsce package --allow-missing-repository"
   },
   "dependencies": {
     "picomatch": "^4.0.7"

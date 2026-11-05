@@ -7,7 +7,7 @@ import type { FileGrouperApi } from '../../extension';
 import type { FileGrouperProvider } from '../../tree/provider';
 import type { Node } from '../../tree/nodes';
 
-export const EXTENSION_ID = 'local.vscode-file-grouper';
+export const EXTENSION_ID = 'local.vscode-group-by-type';
 
 export async function activateExtension(): Promise<FileGrouperApi> {
   const extension = vscode.extensions.getExtension<FileGrouperApi>(EXTENSION_ID);

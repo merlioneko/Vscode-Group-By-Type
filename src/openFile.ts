@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export const OPEN_FILE_COMMAND = 'fileGrouper.openFile';
+export const OPEN_FILE_COMMAND = 'groupByType.openFile';
 
 /**
  * ファイルを開くコマンド（BL-6）。contributes.commands には登録しない。

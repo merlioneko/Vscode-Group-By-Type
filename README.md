@@ -1,6 +1,6 @@
-# File Grouper
+# Group by Type
 
-VS Code のエクスプローラーに、フォルダ直下のファイルを拡張子ごとにまとめて表示するツリービュー「File Grouper」を追加します。グループは1つずつ開閉できるので、今は要らない種類のファイルを畳んで隠せます。
+VS Code のエクスプローラーに、フォルダ直下のファイルを拡張子ごとにまとめて表示するツリービュー「Group by Type」を追加します。グループは1つずつ開閉できるので、今は要らない種類のファイルを畳んで隠せます。
 
 実際のファイルやフォルダには一切変更を加えません（読み取り専用）。
 
@@ -15,7 +15,7 @@ VS Code のエクスプローラーに、フォルダ直下のファイルを拡
 
 ## 使い方
 
-エクスプローラーの中に「File Grouper」のセクションが追加されます。セクションはドラッグで別の場所へ移せます。
+エクスプローラーの中に「Group by Type」のセクションが追加されます。セクションはドラッグで別の場所へ移せます。
 
 ## 既知の制限
 
@@ -36,7 +36,7 @@ Marketplace には公開していません。VSIX ファイルを作ってイン
 ```bash
 npm ci
 npm run package
-code --install-extension vscode-file-grouper-0.1.0.vsix
+code --install-extension vscode-group-by-type-0.1.0.vsix
 ```
 
 対象は VS Code デスクトップ版 1.90 以降です。Web 版（vscode.dev）には対応しません。
@@ -53,3 +53,7 @@ code --install-extension vscode-file-grouper-0.1.0.vsix
 | VSIX の作成 | `npm run package` |
 
 F5（「Run Extension」）で、テスト用ワークスペースを開いた拡張機能開発ホストが起動します。
+
+## ライセンス
+
+MIT ライセンスです。全文は `LICENSE` を参照してください。

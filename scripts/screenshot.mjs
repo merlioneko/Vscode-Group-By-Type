@@ -2,8 +2,8 @@
 //
 // 使い方：xvfb-run -a npm run screenshot -- [オプション]
 //   --out <path>      保存先（既定：.vscode-test/screenshots/screenshot.png）
-//   --open <relPath>  File Grouper のツリーをたどって、このファイルをクリックして開く（例：docs/logo.png）
-//   --expand-all      File Grouper のツリーをすべて展開する
+//   --open <relPath>  Group by Type のツリーをたどって、このファイルをクリックして開く（例：docs/logo.png）
+//   --expand-all      Group by Type のツリーをすべて展開する
 //   --no-folder       フォルダを開かずに起動する
 //   --locale <id>     表示言語（例：ja）。VS Code の言語パックを .vscode-test/extensions-locale に入れておく：
 //                     code --extensions-dir=.vscode-test/extensions-locale --install-extension MS-CEINTL.vscode-language-pack-ja
@@ -126,22 +126,22 @@ try {
     // フォルダを開いていないウィンドウでは、サイドバーが閉じている
     await page.keyboard.press('Control+Shift+E');
   }
-  const pane = page.locator('.pane').filter({ has: page.locator('.pane-header', { hasText: 'File Grouper' }) });
+  const pane = page.locator('.pane').filter({ has: page.locator('.pane-header', { hasText: 'Group by Type' }) });
   await pane.waitFor({ timeout: 30000 });
   if (options.noFolder && (await pane.locator('.pane-header').getAttribute('aria-expanded')) !== 'true') {
     await pane.locator('.pane-header').click();
   }
 
   if (!options.noFolder) {
-    // 標準エクスプローラーのフォルダのセクション（ワークスペース名）を畳み、File Grouper の表示領域を広げる
+    // 標準エクスプローラーのフォルダのセクション（ワークスペース名）を畳み、Group by Type の表示領域を広げる
     const explorerHeader = page.locator('.pane-header', { hasText: /^sample/i }).first();
     if ((await explorerHeader.getAttribute('aria-expanded')) === 'true') {
       await explorerHeader.click();
     }
-    // File Grouper 以外のセクションも畳む
+    // Group by Type 以外のセクションも畳む
     for (const header of await page.locator('.pane-header[aria-expanded="true"]').all()) {
       const text = (await header.innerText()).trim();
-      if (!/File Grouper/i.test(text)) {
+      if (!/Group by Type/i.test(text)) {
         await header.click();
       }
     }
