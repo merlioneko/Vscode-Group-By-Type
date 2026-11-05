@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { buildChildren, joinRelPath } from '../core/buildChildren';
-import { createExcludeMatcher, type ExcludeMatcher } from '../core/exclude';
+import { createExcludeMatcher, MATCH_TIMEOUT_MS, MAX_DISABLED_RULES, type ExcludeMatcher } from '../core/exclude';
 import { errorId, fileId, folderId, groupId } from '../core/ids';
 import { OPEN_FILE_COMMAND } from '../openFile';
 import type { DirectoryReader } from './directoryReader';
 import type { ErrorNode, FileNode, FolderNode, GroupNode, Node } from './nodes';
 
-export type Logger = Pick<vscode.LogOutputChannel, 'error'>;
+export type Logger = Pick<vscode.LogOutputChannel, 'error' | 'warn'>;
 
 export class FileGrouperProvider implements vscode.TreeDataProvider<Node>, vscode.Disposable {
   private readonly changeEmitter = new vscode.EventEmitter<Node | undefined>();
@@ -149,7 +149,17 @@ export class FileGrouperProvider implements vscode.TreeDataProvider<Node>, vscod
     const key = rootUri.toString();
     let matcher = this.matchers.get(key);
     if (!matcher) {
-      matcher = createExcludeMatcher(vscode.workspace.getConfiguration('files', rootUri).get('exclude'));
+      matcher = createExcludeMatcher(vscode.workspace.getConfiguration('files', rootUri).get('exclude'), {
+        // BL-2「照合の制限時間」：無効にした規則を出力チャネルに記録する（通知は出さない）
+        onRuleDisabled: ({ pattern, allDisabled }) => {
+          const message = `files.exclude: matching "${pattern}" took longer than ${MATCH_TIMEOUT_MS}ms in ${key}; the pattern is ignored.`;
+          this.log.warn(
+            allDisabled
+              ? `${message} ${MAX_DISABLED_RULES} patterns were ignored, so all files.exclude patterns are ignored for this folder.`
+              : message,
+          );
+        },
+      });
       this.matchers.set(key, matcher);
     }
     return matcher;

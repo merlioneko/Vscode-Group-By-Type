@@ -1,5 +1,5 @@
 import * as assert from 'node:assert/strict';
-import { createExcludeMatcher } from '../../core/exclude';
+import { createExcludeMatcher, type RuleDisabledEvent } from '../../core/exclude';
 
 /**
  * relPath の最後の部分を名前として判定する。
@@ -70,6 +70,62 @@ describe('createExcludeMatcher (BL-2)', () => {
     it('設定が object でなければ何も除外しない', () => {
       assert.equal(check(undefined, '.git'), false);
       assert.equal(check(null, '.git'), false);
+    });
+  });
+
+  describe('照合の制限時間 (BL-2, AC-11)', () => {
+    // 制限時間がなければ照合が終わらない組み合わせ（CVE-2026-112366）
+    const evilName = 'a'.repeat(40) + 'b';
+    const items = [
+      { relPath: evilName, name: evilName },
+      { relPath: 'b.log', name: 'b.log' },
+    ];
+
+    function timed<T>(fn: () => T): { value: T; ms: number } {
+      const start = performance.now();
+      const value = fn();
+      return { value, ms: performance.now() - start };
+    }
+
+    it('照合が終わらない規則は打ち切って無効にし、ほかの規則は効き続ける', () => {
+      const events: RuleDisabledEvent[] = [];
+      const matcher = createExcludeMatcher(
+        { '+(*a)': true, '**/*.log': true },
+        { onRuleDisabled: (event) => events.push(event) },
+      );
+
+      const first = timed(() => matcher(items));
+      assert.ok(first.ms < 1000, `${first.ms.toFixed(0)}ms かかった`);
+      assert.deepEqual([...first.value], ['b.log']);
+      assert.deepEqual(events, [{ pattern: '+(*a)', allDisabled: false }]);
+
+      // 無効にした規則はもう使わないので、2回目は打ち切りを待たない
+      const second = timed(() => matcher(items));
+      assert.ok(second.ms < 100, `${second.ms.toFixed(0)}ms かかった`);
+      assert.deepEqual([...second.value], ['b.log']);
+      assert.equal(events.length, 1);
+    });
+
+    it('無効にした規則が3つに達すると、すべての規則を無効にして何も除外しない', () => {
+      const events: RuleDisabledEvent[] = [];
+      const matcher = createExcludeMatcher(
+        { '**/*.log': true, '+(*a)': true, '**/+(*a)': true, '(*a)+': true },
+        { onRuleDisabled: (event) => events.push(event) },
+      );
+
+      const first = timed(() => matcher(items));
+      assert.ok(first.ms < 1500, `${first.ms.toFixed(0)}ms かかった`);
+      assert.deepEqual([...first.value], []);
+      assert.deepEqual(events, [
+        { pattern: '+(*a)', allDisabled: false },
+        { pattern: '**/+(*a)', allDisabled: false },
+        { pattern: '(*a)+', allDisabled: true },
+      ]);
+
+      const second = timed(() => matcher(items));
+      assert.ok(second.ms < 100, `${second.ms.toFixed(0)}ms かかった`);
+      assert.deepEqual([...second.value], []);
+      assert.equal(events.length, 3);
     });
   });
 });

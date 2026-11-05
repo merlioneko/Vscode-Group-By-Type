@@ -25,7 +25,13 @@ function fakeReader(root: vscode.Uri, tree: FakeTree): DirectoryReader {
 
 function fakeLog() {
   const messages: string[] = [];
-  return { messages, error: (message: string | Error) => void messages.push(String(message)) };
+  const warnings: string[] = [];
+  return {
+    messages,
+    warnings,
+    error: (message: string | Error) => void messages.push(String(message)),
+    warn: (message: string) => void warnings.push(message),
+  };
 }
 
 async function rootOf(provider: FileGrouperProvider): Promise<FolderNode> {
@@ -140,6 +146,40 @@ describe('2-provider', () => {
         10000,
       );
       assert.ok(elapsed < 1000, `${elapsed.toFixed(0)}ms かかった`);
+    });
+  });
+
+  describe('AC-11: 照合が終わらない files.exclude の規則', () => {
+    it('getChildren が1秒以内に終わり、その規則だけが無視され、警告が1件記録される', async () => {
+      const rootUri = workspaceRoot();
+      const config = vscode.workspace.getConfiguration('files', rootUri);
+      const original = config.inspect<Record<string, unknown>>('exclude')?.workspaceValue;
+      const evilName = 'a'.repeat(40) + 'b';
+      await config.update('exclude', { ...original, '+(*a)': true }, vscode.ConfigurationTarget.Workspace);
+      try {
+        const log = fakeLog();
+        const provider = new FileGrouperProvider(
+          fakeReader(rootUri, { '': [['.git', Directory], ['src', Directory], [evilName, File]] }),
+          log,
+        );
+        const root = await rootOf(provider);
+
+        const start = performance.now();
+        const children = await provider.getChildren(root);
+        const elapsed = performance.now() - start;
+
+        assert.ok(elapsed < 1000, `${elapsed.toFixed(0)}ms かかった`);
+        // .git は既定の files.exclude で隠れたまま。細工した名前のファイルは表示される
+        assert.deepEqual(children.map((n) => describeNode(provider, n)), [
+          'folder:src [collapsed]',
+          'group:(no extension) 1 [expanded]',
+        ]);
+        assert.equal(log.warnings.length, 1);
+        assert.ok(log.warnings[0].includes('"+(*a)"'), log.warnings[0]);
+        assert.ok(log.warnings[0].includes(rootUri.toString()), log.warnings[0]);
+      } finally {
+        await config.update('exclude', original, vscode.ConfigurationTarget.Workspace);
+      }
     });
   });
 });
