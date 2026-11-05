@@ -49,10 +49,11 @@
 | K-15 | 実行時の依存は picomatch だけとする。ネットワーク通信もテレメトリもない | 読み取り専用のローカル機能には不要。確かめる範囲を小さく保てる |
 | K-16 | 制限モード（Restricted Mode）と仮想ワークスペースでも動かす（`untrustedWorkspaces.supported: true`、`virtualWorkspaces: true`） | ワークスペース内のコードを実行せず、読み取りしかしない |
 | K-17 | UI の文言は英語を既定にし、日本語訳を同梱する | VS Code の表示言語に合わせて切り替わる |
-| K-18 | 配布は VSIX ファイルを手元でインストールする方式とする | 一次実装の目的は試用。公開するには publisher の登録やライセンスの整備が別に必要になる |
+| K-18 | 配布は VSIX ファイルを手元でインストールする方式とする | 一次実装の目的は試用。Marketplace に公開するには publisher の登録が別に必要になる |
 | K-19 | 分類・除外・並び順のロジック（core）は vscode に依存させず、mocha で単体テストする。VS Code 上の挙動は統合テストと手動確認で確かめる | 規則を VS Code なしで素早く検証できる |
 | K-20 | 実装は Claude Code のクラウドセッションで行う。統合テストは xvfb 上の VS Code で実行し、画面は Playwright で VS Code を起動して撮影して確かめる | VS Code 1.144.1 で、統合テストの実行と画面の撮影ができることを確認済み（root で動くため `--no-sandbox` が必要）。実装した側が、その場で動作と見た目を確かめられる |
 | K-21 | 名称は File Grouper とする（パッケージ名 `vscode-file-grouper`、ID の接頭辞 `fileGrouper`、publisher `local`）。ビュー名も File Grouper とし、日本語には訳さない | リポジトリ名に合わせた（利用者確認済み）。製品名なので訳さない |
+| K-22 | ライセンスは MIT とし、著作権者は merlioneko とする | リポジトリを公開するため。VS Code 拡張機能で最も一般的で、VSIX に同梱する picomatch も MIT（利用者確認済み） |
 
 ## 未確定事項
 

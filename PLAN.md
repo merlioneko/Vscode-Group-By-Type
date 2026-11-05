@@ -47,7 +47,7 @@
 | `test:integration` | `dev` の後に `vscode-test` |
 | `check:rules` | `node scripts/check-rules.mjs` |
 | `vscode:prepublish` | `npm run compile`（vsce が VSIX を作る前に実行する。`out/` は git で管理しないため、これがないと新しいクローンで `package` が失敗する） |
-| `package` | `vsce package --allow-missing-repository --skip-license` |
+| `package` | `vsce package --allow-missing-repository`（`LICENSE` も VSIX に入る） |
 
 - `.vscode-test.mjs`：files は `out/test/integration/**/*.test.js`、workspaceFolder は `.test-workspace/sample`、mocha の timeout は 20 秒。root で実行しているときだけ、launchArgs に `--no-sandbox` を加える（クラウド環境は root で動くため）。テストは最新の stable の VS Code で行い、1.90 では実行しない
 - `scripts/prepare-fixture.mjs`：M0 では、空の `.test-workspace/sample/` を作り直すだけでよい（中身は M2 で作る）

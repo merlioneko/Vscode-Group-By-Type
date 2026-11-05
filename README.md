@@ -53,3 +53,7 @@ code --install-extension vscode-file-grouper-0.1.0.vsix
 | VSIX の作成 | `npm run package` |
 
 F5（「Run Extension」）で、テスト用ワークスペースを開いた拡張機能開発ホストが起動します。
+
+## ライセンス
+
+MIT ライセンスです。全文は `LICENSE` を参照してください。

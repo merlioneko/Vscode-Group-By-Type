@@ -4,6 +4,7 @@
   "description": "A tree view that groups the files in each folder by extension.",
   "publisher": "local",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "engines": {
     "vscode": "^1.90.0"
@@ -63,7 +64,7 @@
     "check:rules": "node scripts/check-rules.mjs",
     "screenshot": "node scripts/screenshot.mjs",
     "vscode:prepublish": "npm run compile",
-    "package": "vsce package --allow-missing-repository --skip-license"
+    "package": "vsce package --allow-missing-repository"
   },
   "dependencies": {
     "picomatch": "^4.0.7"
