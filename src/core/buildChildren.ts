@@ -63,12 +63,12 @@ export function buildChildren(
   parentRelPath: string,
   isExcluded: ExcludeMatcher,
 ): Children {
-  const siblingNames = new Set(entries.map((e) => e.name));
+  const excluded = isExcluded(entries.map((e) => ({ relPath: joinRelPath(parentRelPath, e.name), name: e.name })));
   const folders: string[] = [];
   const filesByKey = new Map<string, string[]>();
 
   for (const entry of entries) {
-    if (isExcluded(joinRelPath(parentRelPath, entry.name), entry.name, siblingNames)) {
+    if (excluded.has(entry.name)) {
       continue;
     }
     if (entry.isDirectory) {
