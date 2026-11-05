@@ -1,4 +1,4 @@
-# File Grouper 仕様書
+# Group by Type 仕様書
 
 > 仕様は本書を唯一の正とする。作業の順序と完了判定は PLAN.md、実装時の行動規律は CLAUDE.md に書く。
 
@@ -52,7 +52,7 @@
 | K-18 | 配布は VSIX ファイルを手元でインストールする方式とする | 一次実装の目的は試用。Marketplace に公開するには publisher の登録が別に必要になる |
 | K-19 | 分類・除外・並び順のロジック（core）は vscode に依存させず、mocha で単体テストする。VS Code 上の挙動は統合テストと手動確認で確かめる | 規則を VS Code なしで素早く検証できる |
 | K-20 | 実装は Claude Code のクラウドセッションで行う。統合テストは xvfb 上の VS Code で実行し、画面は Playwright で VS Code を起動して撮影して確かめる | VS Code 1.144.1 で、統合テストの実行と画面の撮影ができることを確認済み（root で動くため `--no-sandbox` が必要）。実装した側が、その場で動作と見た目を確かめられる |
-| K-21 | 名称は File Grouper とする（パッケージ名 `vscode-file-grouper`、ID の接頭辞 `fileGrouper`、publisher `local`）。ビュー名も File Grouper とし、日本語には訳さない | リポジトリ名に合わせた（利用者確認済み）。製品名なので訳さない |
+| K-21 | 名称は Group by Type とする（リポジトリ名とパッケージ名 `vscode-group-by-type`、ID の接頭辞 `groupByType`、publisher `local`）。ビュー名も Group by Type とし、日本語には訳さない | 当初の名称 File Grouper は、Marketplace に同じ表示名の拡張機能があったため改めた。発想の元であるファイルエクスプローラーの「グループで表示 › 種類」（Group by › Type）を名前にした（利用者確認済み）。製品名なので訳さない |
 | K-22 | ライセンスは MIT とし、著作権者は merlioneko とする | リポジトリを公開するため。VS Code 拡張機能で最も一般的で、VSIX に同梱する picomatch も MIT（利用者確認済み） |
 
 ## 未確定事項
@@ -192,9 +192,9 @@ interface ErrorNode {
 
 ### 配置と操作
 
-- **場所**：エクスプローラー（`contributes.views.explorer`）。ビュー ID は `fileGrouper.view`。
-- **タイトルバー**：「最新の情報に更新」（コマンド `fileGrouper.refresh`、アイコン `$(refresh)`）と「すべて折りたたむ」（`createTreeView` の `showCollapseAll: true`）を置く。
-- **コマンドパレット**：`fileGrouper.refresh` にはカテゴリ `File Grouper` を付け、「File Grouper: 最新の情報に更新」と表示する。カテゴリがないと「最新の情報に更新」だけになり、ほかのコマンドと見分けにくい（利用者確認済み）。
+- **場所**：エクスプローラー（`contributes.views.explorer`）。ビュー ID は `groupByType.view`。
+- **タイトルバー**：「最新の情報に更新」（コマンド `groupByType.refresh`、アイコン `$(refresh)`）と「すべて折りたたむ」（`createTreeView` の `showCollapseAll: true`）を置く。
+- **コマンドパレット**：`groupByType.refresh` にはカテゴリ `Group by Type` を付け、「Group by Type: 最新の情報に更新」と表示する。カテゴリがないと「最新の情報に更新」だけになり、ほかのコマンドと見分けにくい（利用者確認済み）。
 - 右クリックメニューはない。
 
 ### 行の表示
@@ -219,15 +219,15 @@ interface ErrorNode {
 
 | 用途 | 英語（既定） | 日本語 |
 |---|---|---|
-| ビュー名 | File Grouper | （翻訳しない） |
+| ビュー名 | Group by Type | （翻訳しない） |
 | 更新コマンド | Refresh | 最新の情報に更新 |
-| コマンドのカテゴリ | File Grouper | （翻訳しない） |
+| コマンドのカテゴリ | Group by Type | （翻訳しない） |
 | 拡張子なしのグループ | (no extension) | (拡張子なし) |
 | エラー行 | Cannot read this folder | このフォルダーを読み込めません |
 | ファイルが消えていたときの警告 | File not found: {0} | ファイルが見つかりません: {0} |
 | 未オープン時の案内 | No folder is open. | フォルダーが開かれていません。 |
 | 案内のボタン | Open Folder | フォルダーを開く |
-| 出力チャネル名 | File Grouper | （翻訳しない） |
+| 出力チャネル名 | Group by Type | （翻訳しない） |
 
 - package.json の文言は `package.nls.json` と `package.nls.ja.json` に書く。コード中の文言は `vscode.l10n.t()` で扱い、訳は `l10n/bundle.l10n.ja.json` に書く。
 
@@ -299,7 +299,7 @@ interface ErrorNode {
 
 | きっかけ | 方法 | タイミング |
 |---|---|---|
-| 更新ボタン | `fileGrouper.refresh` | すぐ |
+| 更新ボタン | `groupByType.refresh` | すぐ |
 | ファイル・フォルダの作成と削除（名前の変更は、削除と作成として届く） | `workspace.createFileSystemWatcher('**/*', false, true, false)`（内容の変更は無視する） | 最後のイベントから 300ms 後に1回 |
 | `files.exclude` の変更 | `workspace.onDidChangeConfiguration` | すぐ |
 | ワークスペースフォルダの追加と削除 | `workspace.onDidChangeWorkspaceFolders` | すぐ |
@@ -310,14 +310,14 @@ interface ErrorNode {
 
 ### BL-6 ファイルを開く
 
-- ファイル行の `command` は `fileGrouper.openFile`（引数は uri）とする。このコマンドは `contributes.commands` に登録せず、コマンドパレットには出さない。
+- ファイル行の `command` は `groupByType.openFile`（引数は uri）とする。このコマンドは `contributes.commands` に登録せず、コマンドパレットには出さない。
 - まず `workspace.fs.stat(uri)` でファイルがあるかを確かめる。
   - あれば `commands.executeCommand('vscode.open', uri)` を実行する。オプションは渡さず、プレビュー表示にするかどうかなどは VS Code の設定に任せる。
   - なければ「ファイルが見つかりません: <ファイル名>」と警告を出し、ツリー全体を描き直す。
 
 ### BL-7 エラーと特殊なファイル
 
-- **ディレクトリを読めないとき**：そのフォルダの子としてエラー行を1つだけ出す。出力チャネル「File Grouper」（`LogOutputChannel`）に URI とエラーを記録する。通知は出さない（展開するたびに出てしまうため）。
+- **ディレクトリを読めないとき**：そのフォルダの子としてエラー行を1つだけ出す。出力チャネル「Group by Type」（`LogOutputChannel`）に URI とエラーを記録する。通知は出さない（展開するたびに出てしまうため）。
 - `getChildren` から例外を投げない。
 - **種類の判定**：`FileType.Directory` のビットが立っていればフォルダとする（フォルダへのシンボリックリンクを含む）。それ以外はファイルとする（壊れたシンボリックリンクを含む）。
 - 読み込むのは展開されたフォルダだけで、先読みはしない。そのため、シンボリックリンクが循環していても無限に読み込むことはない。
@@ -400,7 +400,7 @@ sample                              ルート：展開
 
 | ID | 条件 | 確認方法 | 元仕様 §7 |
 |---|---|---|---|
-| AC-1 | エクスプローラーに「File Grouper」が表示され、開ける | 統合：`fileGrouper.view.focus` が成功する。手動：目視 | 1 |
+| AC-1 | エクスプローラーに「Group by Type」が表示され、開ける | 統合：`groupByType.view.focus` が成功する。手動：目視 | 1 |
 | AC-2 | フォルダ階層が、期待するツリーと一致する | 統合：ルートから getChildren をたどって比べる | 2 |
 | AC-3 | 各フォルダのグループ、件数、所属するファイル、並び順が、期待するツリーと一致する | 統合：同上。単体：BL-1〜BL-3 の表のすべての行 | 3 |
 | AC-4 | 初期状態が BL-4 のとおりになる。グループを1つずつ開閉でき、ほかのグループに影響しない | 統合：TreeItem の collapsibleState を見る。手動：実際に開閉する | 4 |

@@ -114,9 +114,9 @@ describe('3-refresh', () => {
     assert.equal(await mdGroupsIn(['sample']), 1);
   });
 
-  it('fileGrouper.refresh を実行すると onDidChangeTreeData が発火する', async () => {
+  it('groupByType.refresh を実行すると onDidChangeTreeData が発火する', async () => {
     const before = fireCount;
-    await vscode.commands.executeCommand('fileGrouper.refresh');
+    await vscode.commands.executeCommand('groupByType.refresh');
     assert.equal(fireCount, before + 1);
   });
 });

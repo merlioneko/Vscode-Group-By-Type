@@ -70,8 +70,8 @@ describe('1-display', () => {
     await vscode.commands.executeCommand('workbench.action.closeAllEditors');
   });
 
-  it('AC-1: File Grouper ビューを開ける', async () => {
-    await vscode.commands.executeCommand('fileGrouper.view.focus');
+  it('AC-1: Group by Type ビューを開ける', async () => {
+    await vscode.commands.executeCommand('groupByType.view.focus');
   });
 
   it('AC-2〜AC-4: ツリーが「期待するツリー」と一致する', async () => {
@@ -135,7 +135,7 @@ describe('1-display', () => {
     let fired = false;
     const subscription = provider.onDidChangeTreeData(() => (fired = true));
     try {
-      await vscode.commands.executeCommand('fileGrouper.openFile', vscode.Uri.joinPath(workspaceRoot(), 'missing.txt'));
+      await vscode.commands.executeCommand('groupByType.openFile', vscode.Uri.joinPath(workspaceRoot(), 'missing.txt'));
       await sleep(500);
     } finally {
       subscription.dispose();

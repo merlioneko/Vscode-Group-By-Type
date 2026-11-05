@@ -1,6 +1,6 @@
 {
-  "name": "vscode-file-grouper",
-  "displayName": "File Grouper",
+  "name": "vscode-group-by-type",
+  "displayName": "Group by Type",
   "description": "A tree view that groups the files in each folder by extension.",
   "publisher": "local",
   "version": "0.1.0",
@@ -24,17 +24,17 @@
   "contributes": {
     "commands": [
       {
-        "command": "fileGrouper.refresh",
+        "command": "groupByType.refresh",
         "title": "%command.refresh%",
-        "category": "File Grouper",
+        "category": "Group by Type",
         "icon": "$(refresh)"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "fileGrouper.refresh",
-          "when": "view == fileGrouper.view",
+          "command": "groupByType.refresh",
+          "when": "view == groupByType.view",
           "group": "navigation"
         }
       ]
@@ -42,14 +42,14 @@
     "views": {
       "explorer": [
         {
-          "id": "fileGrouper.view",
+          "id": "groupByType.view",
           "name": "%view.name%"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "fileGrouper.view",
+        "view": "groupByType.view",
         "contents": "%viewsWelcome.noFolder%",
         "when": "workspaceFolderCount == 0"
       }

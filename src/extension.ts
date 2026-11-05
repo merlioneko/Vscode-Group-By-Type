@@ -4,8 +4,8 @@ import { watchForRefresh } from './refresh';
 import { workspaceDirectoryReader } from './tree/directoryReader';
 import { FileGrouperProvider } from './tree/provider';
 
-export const VIEW_ID = 'fileGrouper.view';
-export const REFRESH_COMMAND = 'fileGrouper.refresh';
+export const VIEW_ID = 'groupByType.view';
+export const REFRESH_COMMAND = 'groupByType.refresh';
 
 /** 統合テスト用に返す */
 export interface FileGrouperApi {
@@ -13,7 +13,7 @@ export interface FileGrouperApi {
 }
 
 export function activate(context: vscode.ExtensionContext): FileGrouperApi {
-  const log = vscode.window.createOutputChannel('File Grouper', { log: true });
+  const log = vscode.window.createOutputChannel('Group by Type', { log: true });
   const provider = new FileGrouperProvider(workspaceDirectoryReader, log);
   const view = vscode.window.createTreeView(VIEW_ID, {
     treeDataProvider: provider,

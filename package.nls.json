@@ -1,5 +1,5 @@
 {
   "command.refresh": "Refresh",
-  "view.name": "File Grouper",
+  "view.name": "Group by Type",
   "viewsWelcome.noFolder": "No folder is open.\n[Open Folder](command:vscode.openFolder)"
 }
